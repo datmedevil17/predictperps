@@ -326,7 +326,7 @@ export function useProgram(): UseProgramReturn {
           )
           .accounts({ owner: publicKey })
           .transaction();
-        return submitTx(tx);
+        return await submitTx(tx);
       } catch (err) {
         console.error("[useProgram] openPosition:", err);
         return null;
@@ -348,7 +348,7 @@ export function useProgram(): UseProgramReturn {
           .closePosition(new BN(currentPrice.toString()))
           .accounts({ owner: publicKey, position: positionPda })
           .transaction();
-        return submitTx(tx, { ephemeral: !!ephemeralConnection });
+        return await submitTx(tx, { ephemeral: !!ephemeralConnection });
       } catch (err) {
         console.error("[useProgram] closePosition:", err);
         return null;
@@ -370,7 +370,7 @@ export function useProgram(): UseProgramReturn {
           .liquidatePosition(new BN(currentPrice.toString()))
           .accounts({ liquidator: publicKey, position: positionPda })
           .transaction();
-        return submitTx(tx, { ephemeral: !!ephemeralConnection });
+        return await submitTx(tx, { ephemeral: !!ephemeralConnection });
       } catch (err) {
         console.error("[useProgram] liquidatePosition:", err);
         return null;
@@ -394,7 +394,7 @@ export function useProgram(): UseProgramReturn {
           .delegate(new BN(marketId.toString()), membersArg)
           .accounts({ payer: publicKey, validator: null })
           .transaction();
-        return submitTx(tx, { commitment: "confirmed" });
+        return await submitTx(tx, { commitment: "confirmed" });
       } catch (err) {
         console.error("[useProgram] delegatePosition:", err);
         return null;
@@ -417,7 +417,7 @@ export function useProgram(): UseProgramReturn {
             position: positionPda,
           })
           .transaction();
-        return submitTx(tx, { ephemeral: true });
+        return await submitTx(tx, { ephemeral: true });
       } catch (err) {
         console.error("[useProgram] revealPosition:", err);
         return null;
@@ -444,7 +444,7 @@ export function useProgram(): UseProgramReturn {
             liquidator: liquidatorPda ?? null,
           })
           .transaction();
-        return submitTx(tx, { commitment: "confirmed" });
+        return await submitTx(tx, { commitment: "confirmed" });
       } catch (err) {
         console.error("[useProgram] settleFunds:", err);
         return null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight, Wallet } from "lucide-react";
 import { getCardBySlug } from "@/app/lib/cards";
@@ -11,6 +11,8 @@ import { calcLiquidationPrice, calcPnl, calcRoi } from "@/app/lib/trading";
 import { CardImage } from "@/app/components/ui/CardImage";
 import { RarityBadge } from "@/app/components/ui/RarityBadge";
 import { PriceChange } from "@/app/components/ui/PriceChange";
+import { useProgram } from "@/app/lib/useProgram";
+import { PublicKey } from "@solana/web3.js";
 
 export function PortfolioView() {
   const mounted = useMounted();
@@ -18,7 +20,8 @@ export function PortfolioView() {
   const positions = usePerpsStore((s) => s.positions);
   const closedTrades = usePerpsStore((s) => s.closedTrades);
   const livePrices = usePerpsStore((s) => s.livePrices);
-  const closePosition = usePerpsStore((s) => s.closePosition);
+  const { closePosition } = useProgram();
+  const [closingId, setClosingId] = useState<string | null>(null);
 
   const summary = useMemo(() => {
     let totalMargin = 0;
@@ -181,10 +184,20 @@ export function PortfolioView() {
                       Manage
                     </Link>
                     <button
-                      onClick={() => closePosition(p.id, mark)}
-                      className="flex-1 rounded-lg border border-short/40 bg-short/10 py-2 text-xs font-semibold text-short transition-colors hover:bg-short/20"
+                      disabled={closingId === p.id || p.isActive === false}
+                      onClick={async () => {
+                        setClosingId(p.id);
+                        try {
+                          await closePosition(new PublicKey(p.id), Math.floor(mark * 1e6));
+                        } catch (err) {
+                          console.error("Failed to close position", err);
+                        } finally {
+                          setClosingId(null);
+                        }
+                      }}
+                      className="flex-1 rounded-lg border border-short/40 bg-short/10 py-2 text-xs font-semibold text-short transition-colors hover:bg-short/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Close
+                      {closingId === p.id ? "Closing..." : "Close"}
                     </button>
                   </div>
                 </div>
